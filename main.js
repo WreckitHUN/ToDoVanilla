@@ -266,6 +266,8 @@ function screenUpdater(){
     
         return `${year}/${month}/${day}`;
     }
+
+    updateContainer();
     
 
 
