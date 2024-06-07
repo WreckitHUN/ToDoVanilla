@@ -175,8 +175,26 @@ function screenUpdater(){
         getWeekDates()
     */
     const _dateHandler = dateHandler();
-    // Get the mainElement div element
     const mainElement = document.querySelector('#todos');
+    const todoModal = document.querySelector("#todoModal");
+    const addPlusButton = document.querySelector("#addPlus");
+    const todoForm = document.querySelector("#todoForm");
+    const title = document.querySelector("#title");
+    const description = document.querySelector("#description");
+    const date = document.querySelector("#date");
+
+    addPlusButton.addEventListener("click", () => {
+        title.value = "";
+        description.value = "";
+        date.value = "";
+        todoModal.showModal();
+    });
+
+    todoForm.addEventListener("submit", () => {
+        const dateNumber = Number(date.value.split('-').join(''));
+        _storageUpdater.addData(title.value, description.value, 1, dateNumber);
+        updateContainer();
+    })
 
     
     function updateContainer(){
@@ -248,20 +266,9 @@ function screenUpdater(){
     
         return `${year}/${month}/${day}`;
     }
-    //_storageUpdater.addData("title", "descriptin", 4, 20240606);
-    updateContainer();
-
     
 
-    /*// Functions for date Picker
-    const date = document.querySelector("#date");
-    date.addEventListener("click", () => {
-        let number = Number(date.value.split('-').join(''));
-        console.log(number);
-    })*/
 
-    
-    
 }
 screenUpdater();
 

@@ -265,3 +265,55 @@ footer{
     transform: translate(0,2px);
     box-shadow: 1px 2px 1px rgb(0 0 0 / 0.1);
 }
+
+.btnAdd{
+    width: fit-content;
+    align-self: center;
+    border-radius: 20px;
+    padding: 10px 20px;
+    transition: all 0.15s;
+}
+
+.btnAdd:hover{
+    color: var(--color-ascent);
+    background: var(--color-secondary);
+}
+
+.btnAdd:active{
+    transform: translate(0,2px);
+}
+
+/* TODO modal */
+#todoModal{
+    color: #000;
+    border-radius: 20px;
+    border: none;
+}
+
+#todoModal h2{
+    color: inherit;
+    text-align: center;
+}
+
+#todoForm{
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.input{
+    background: var(--color-background-grey);
+    outline: 0;
+    border-radius: 10px;
+    padding: 1rem 2rem;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+#description{
+    width: 100%; 
+    min-height: 100px;
+    resize: none;
+}
+
