@@ -28,14 +28,14 @@ function localStorageUpdater(){
 
     // Get the latest _id from the storage
     const currentDataArray = getData();
-    if (currentDataArray === null || currentDataArray.length === 0){
+    if (!currentDataArray?.length){
         _id = 0;
     } else _id = currentDataArray[currentDataArray.length - 1].id;
 
   
-    function addData(title, description, priority, date) {
+    function addData(title, description, priority, date, checked) {
         // Create the data obj
-        const data = createToDo(title, description, priority, date);
+        const data = createToDo(title, description, priority, date, checked);
         // Get the dataArray from local storage
         let dataArray = getData();
         dataArray = dataArray === null ? [] : dataArray;
@@ -51,21 +51,44 @@ function localStorageUpdater(){
         // Get the dataArray from local storage
         let dataArray = getData();
         if (dataArray === null) return;
-        console.log(dataArray);
         // Filter the data array
         const filteredData = dataArray.filter((todo) => todo.id !== id);
         // Update the local storage
         updateLocalStorage(filteredData);
     }
 
-
-    // Return the sorted data by the dates
-    function sortData(){
-        const dataArray = getData();
-        return dataArray.sort((a, b) => a.date - b.date);
+    function toggleChecked(id){
+        // Get the dataArray from local storage
+        let dataArray = getData();
+        if (dataArray === null) return;
+        
+        dataArray.forEach((todo) => {
+            if (todo.id === id) todo.checked = !todo.checked;
+        })
+        // Update the local storage
+        updateLocalStorage(dataArray);
     }
 
-    function createToDo(title, description, priority, date){
+
+    // Return the sorted data by the dates and put checked to the last
+    function sortData(){
+        const dataArray = getData();
+        if (!dataArray?.length) return;
+        let uncheckedArray = [];
+        let checkedArray = [];
+        dataArray.forEach((todo) => {
+            if (todo.checked) {
+                checkedArray.push(todo);
+            } else uncheckedArray.push(todo);
+        });
+        // Sort each array
+        if (checkedArray?.length) checkedArray.sort((a, b) => a.date - b.date);
+        if (uncheckedArray?.length) uncheckedArray.sort((a, b) => a.date - b.date);
+
+        return [...uncheckedArray, ...checkedArray];
+    }
+
+    function createToDo(title, description, priority, date, checked = false){
         _id++;
         return {
             id: _id,
@@ -73,6 +96,7 @@ function localStorageUpdater(){
             description,
             priority,
             date,
+            checked,
         };
     }
 
@@ -86,39 +110,47 @@ function localStorageUpdater(){
         // Add the data to localStorage
         _dataHandler.addToLocalStorage(dataArray);
     }
-
-
     return {
-        // Add data (title, description, priority, date)
+        // Add data (title, description, priority, date, checked)
         addData,
         // Remove a data by id
         removeData,
-        // Return the raw data
-        getData,
         // Return a the sorted data by date
         sortData,
+        // Toggle checked
+        toggleChecked,
     };
 
 }
 
-function screenUpdater(){
-    const _storageUpdater = localStorageUpdater();
-    
-
-
-
-    // Functions for date Picker
-    const date = document.querySelector("#date");
-    date.addEventListener("click", () => {
-        let number = Number(date.value.split('-').join(''));
-        console.log(number);
-    })
-    // Functions for TODAY 
-    const today = new Date();
-    function convertToday(date){
-        return date.getFullYear().toString() + addLeadingZero(date.getMonth() + 1) + addLeadingZero(date.getDate());
+function dateHandler(){
+    // Functions for Date
+    function getTodayDate(){
+        let today = new Date();
+        return convertDate(today);
     }
 
+    function getWeekDates() {
+        let now = new Date();
+        let dayOfWeek = now.getDay(); // 0-6 where 0 is Sunday
+        let numDay = now.getDate();
+    
+        let start = new Date(now); //copy
+        start.setDate(numDay - ((dayOfWeek + 6) % 7));
+        start.setHours(0, 0, 0, 0);
+    
+        let dates = [];
+        for (let i = 0; i < 7; i++) {
+            let newDate = new Date(start);
+            newDate.setDate(newDate.getDate() + i);
+            dates.push(convertDate(newDate));
+        }
+        return dates;
+    }
+
+    function convertDate(date){
+        return date.getFullYear().toString() + addLeadingZero(date.getMonth() + 1) + addLeadingZero(date.getDate());
+    }
     function addLeadingZero(number) {
         if (number < 10) {
             return '0' + number;
@@ -126,10 +158,113 @@ function screenUpdater(){
             return number.toString();
         }
     }
-    
+
+    return {
+        getTodayDate,
+        getWeekDates,
+    }
 }
 
+function screenUpdater(){
+    /*  addData(title, description, priority, date)
+        removeData(id)
+        sortData() 
+    */
+    const _storageUpdater = localStorageUpdater();
+    /*  getTodayDate()
+        getWeekDates()
+    */
+    const _dateHandler = dateHandler();
+    // Get the mainElement div element
+    const mainElement = document.querySelector('#todos');
+
+    
+    function updateContainer(){
+        // Clear the site
+        mainElement.textContent = "";
+        const dataArray = _storageUpdater.sortData();
+        if (!dataArray?.length) return;
+        dataArray.forEach(todo => {
+            // Create todoDiv
+            const todoDiv = createTodoDiv(todo);
+            // Add todoDiv to mainElement
+            mainElement.appendChild(todoDiv);
+        });
+    }
+
+    function createTodoDiv(todo) {
+        const id = todo.id;
+        const todoDiv = document.createElement("div");
+        const titleP = document.createElement("p");
+        const dateP = document.createElement("p");
+        const checkButton = document.createElement("button");
+        const closeButton = document.createElement("button");
+    
+        todoDiv.classList.add("todo");
+        todoDiv.classList.add(`priority${todo.priority}`);
+        todoDiv.id = `todo${id}`;
+        todoDiv.addEventListener("mouseenter", () => {
+            closeButton.classList.add("hover");
+        })
+        todoDiv.addEventListener("mouseleave", () => {
+            closeButton.classList.remove("hover");
+        })
+        
+        titleP.classList.add("title");
+        titleP.textContent = `${todo.title}`;
+    
+        dateP.classList.add("date");
+        dateP.textContent = formatDate(todo.date.toString());
+    
+        checkButton.classList.add("checkButton");
+        if (todo.checked) {
+            checkButton.classList.add("active");
+        } else checkButton.classList.remove("active");
+
+        checkButton.addEventListener("click", () => {
+            _storageUpdater.toggleChecked(id);
+            updateContainer();
+        });
+
+        closeButton.classList.add("closeButton");
+        closeButton.textContent = "X";
+        closeButton.addEventListener("click", () => {
+            _storageUpdater.removeData(id);
+            updateContainer();
+        });
+        
+        todoDiv.appendChild(checkButton);
+        todoDiv.appendChild(closeButton);
+        todoDiv.appendChild(titleP);
+        todoDiv.appendChild(dateP);
+    
+        return todoDiv;
+    }
+
+    function formatDate(dateString) {
+        let year = dateString.slice(0, 4);
+        let month = dateString.slice(4, 6);
+        let day = dateString.slice(6, 8);
+    
+        return `${year}/${month}/${day}`;
+    }
+    //_storageUpdater.addData("title", "descriptin", 4, 20240606);
+    updateContainer();
+
+    
+
+    /*// Functions for date Picker
+    const date = document.querySelector("#date");
+    date.addEventListener("click", () => {
+        let number = Number(date.value.split('-').join(''));
+        console.log(number);
+    })*/
+
+    
+    
+}
 screenUpdater();
+
 
 
 

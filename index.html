@@ -3,13 +3,53 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=Quicksand&display=swap"
+      rel="stylesheet"
+    />
     <link rel="stylesheet" href="css/normalize.css" />
     <link rel="stylesheet" href="css/style.css" />
     <title>Document</title>
   </head>
   <body>
-    <div id="container"></div>
-    <input id="date" type="date" name="date" />
+    <dialog id="todoModal">
+      <form method="dialog" id="todoForm">
+        <h2>Add new todo</h2>
+        <div class="form__element">
+          <input class="input" type="text" id="title" name="title" placeholder="Title" required />
+        </div>
+        <div class="form__element">
+          <input class="input" type="text" id="description" name="author" placeholder="Author" required />
+        </div>
+        <div class="form__element">
+          <input class="input" type="number" id="pages" name="pages" placeholder="Pages" required />
+        </div>
+        <div class="form__element">
+          <label for="read">Have I read it?</label>
+          <input class="input" type="checkbox" id="read" name="read" />
+        </div>
+        <button class="btn btn--green" type="submit" id="add"><em>Add book</em></button>
+      </form>
+    </dialog>
+    <div id="container">
+      <header>
+        <h1>WHAT TO DO?</h1>
+      </header>
+      <main>
+        <div id="todos"></div>
+        <button id="add" class="btn btnPlus">+</button>
+      </main>
+      <aside>
+        <button id="allTask" class="btn btnPrimary">All tasks</button>
+        <button id="today" class="btn btnPrimary">Today</button>
+        <button id="thisWeek" class="btn btnPrimary">This Week</button>
+      </aside>
+      <footer>
+        <p>Made by Szabolcs</p>
+      </footer>
+    </div>
     <script src="main.js"></script>
   </body>
 </html>
